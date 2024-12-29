@@ -3,14 +3,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "../../Components/Button";
 import Swal from "sweetalert2";
+import Login from '../Login/Login';
+import { useNavigate } from "react-router-dom";
 
 const AddCourse = () => {
-    const {register, handleSubmit, formState:{errors}} = useForm();
+    const token = localStorage.getItem('token')
+    const {register, handleSubmit, formState:{errors}, reset} = useForm();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('')
+    const navigate = useNavigate()
     const handleAddCourse = (data) => {
+        console.log(data)
         setIsLoading(true);
-        const token = `Bearer ${localStorage.getItem('token')}`;
+        const token = localStorage.getItem('token');
         console.log('Token:', token); // Check if token is valid
     
         if (!token) {
@@ -23,7 +28,7 @@ const AddCourse = () => {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
-                Authorization: token,
+                Authorization: `Bearer ${token}`
             },
             body: JSON.stringify(data)
         })
@@ -32,6 +37,8 @@ const AddCourse = () => {
             console.log(registerData); // Log the response for debugging
             if (registerData?.status) {
                 Swal.fire(registerData?.status_message);
+                reset();
+                navigate('/allCourses')
             } else {
                 setError(registerData?.status_message);
                 setIsLoading(false);
@@ -43,6 +50,9 @@ const AddCourse = () => {
             setIsLoading(false);
         });
     };
+    if(!token){
+        return <Login/>
+    }
   return (
     <section className="mt-8 md:mt-12 mx-6 md:mx-16">
             <div className="flex flex-col md:flex-row space-x-0 md:space-x-4 space-y-4 md:space-y-0">
@@ -86,7 +96,7 @@ const AddCourse = () => {
                     </div>
                     <div className="mt-4 flex flex-col">
                         <label className="font-semibold">Course Color Type</label>
-                        <select type="text" {...register('badge_text', {required:true})} placeholder="Enter your name" className="border border-slate-800 rounded-md w-full mt-3 py-2 px-1">
+                        <select type="text" {...register('badge_color', {required:true})} placeholder="Enter your name" className="border border-slate-800 rounded-md w-full mt-3 py-2 px-1">
                             <option >Select one</option>
                             <option value={'red'}>Featured</option>
                             <option value={'green'}>Regular</option>
